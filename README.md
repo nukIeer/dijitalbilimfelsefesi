@@ -20,7 +20,18 @@ Bir listeye yeni satır eklemek isterseniz, önceki satırın sonunda virgül bu
 
 ## Siteyi Görüntüleme
 
-GitHub'a kaydedilen değişiklikler, Netlify bağlantısı aktifse kısa süre içinde yayınlanan siteye yansır. Güncelleme görünmüyorsa sayfayı yenileyin veya tarayıcı önbelleğini temizleyin.
+Site Cloudflare Workers üzerinde `dijitalbilimfelsefesi.com` alan adıyla yayınlanacak şekilde ayarlanmıştır. GitHub'a kaydedilen metin değişiklikleri, proje geliştiricisi tarafından `npm run deploy` komutuyla yayınlanır. Güncelleme görünmüyorsa sayfayı yenileyin veya tarayıcı önbelleğini temizleyin.
+
+## Cloudflare Yayını
+
+İlk yayın için Cloudflare hesabında `dijitalbilimfelsefesi.com` alan adının eklenmiş ve etkin olması gerekir. Proje klasöründe aşağıdaki komut çalıştırılır:
+
+```bash
+npm install
+npm run deploy
+```
+
+İlk çalıştırmada Cloudflare oturum açma sayfası açılır. Oturum açıldıktan sonra Worker, alan adına otomatik olarak bağlanır. Cloudflare API anahtarı veya şifre hiçbir zaman bu depoya yazılmamalıdır.
 
 ## Proje Bilgileri
 
