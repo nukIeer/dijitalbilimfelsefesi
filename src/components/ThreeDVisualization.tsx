@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
-import { Crosshair, Loader2, Maximize2, Minimize2, Pause, Play, X } from 'lucide-react';
+import { Crosshair, ExternalLink, FileSearch, Loader2, Maximize2, Minimize2, Pause, Play, X } from 'lucide-react';
 import * as THREE from 'three';
 
 type LinkEndpoint = string | { id: string };
@@ -94,22 +94,27 @@ function createLabelSprite(label: string, color: string, nodeSize: number, empha
   const paddingX = emphasized ? 16 : 12;
   const paddingY = emphasized ? 10 : 8;
   context.font = `600 ${fontSize}px Arial`;
-  canvas.width = Math.ceil(context.measureText(label).width) + paddingX * 2;
-  canvas.height = fontSize + paddingY * 2;
+  const width = Math.ceil(context.measureText(label).width) + paddingX * 2;
+  const height = fontSize + paddingY * 2;
+  const pixelRatio = 2;
+  canvas.width = width * pixelRatio;
+  canvas.height = height * pixelRatio;
+  context.scale(pixelRatio, pixelRatio);
 
   context.font = `600 ${fontSize}px Arial`;
-  const background = context.createLinearGradient(0, 0, canvas.width, canvas.height);
-  background.addColorStop(0, 'rgba(2, 8, 23, 0.95)');
-  background.addColorStop(1, hexToRgba(color, 0.38));
-  context.fillStyle = background;
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.strokeStyle = hexToRgba(color, 0.9);
-  context.lineWidth = 2;
-  context.strokeRect(1, 1, canvas.width - 2, canvas.height - 2);
+  const haze = context.createRadialGradient(width / 2, height / 2, 2, width / 2, height / 2, Math.max(width, height) * 0.58);
+  haze.addColorStop(0, 'rgba(3, 10, 25, 0.5)');
+  haze.addColorStop(0.5, hexToRgba(color, 0.16));
+  haze.addColorStop(1, hexToRgba(color, 0));
+  context.fillStyle = haze;
+  context.fillRect(0, 0, width, height);
+  context.shadowColor = hexToRgba(color, 0.8);
+  context.shadowBlur = emphasized ? 8 : 6;
   context.fillStyle = '#f8fafc';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
-  context.fillText(label, canvas.width / 2, canvas.height / 2);
+  context.fillText(label, width / 2, height / 2);
+  context.shadowBlur = 0;
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -121,9 +126,13 @@ function createLabelSprite(label: string, color: string, nodeSize: number, empha
   }));
   sprite.name = 'citation-label';
   sprite.renderOrder = 2;
-  const height = Math.max(emphasized ? 9 : 7, nodeSize * (emphasized ? 2.1 : 1.75));
-  sprite.scale.set((canvas.width / canvas.height) * height, height, 1);
-  sprite.position.set(0, nodeSize + height * 0.7, 0);
+  const sizeWeight = Math.min(1, Math.max(0, (nodeSize - 2) / 6.5));
+  const baseOpacity = emphasized ? 1 : 0.025 + (sizeWeight ** 2.4) * 0.7;
+  sprite.userData.baseOpacity = baseOpacity;
+  sprite.material.opacity = baseOpacity;
+  const spriteHeight = Math.max(emphasized ? 9 : 7, nodeSize * (emphasized ? 2.1 : 1.75));
+  sprite.scale.set((width / height) * spriteHeight, spriteHeight, 1);
+  sprite.position.set(0, nodeSize + spriteHeight * 0.7, 0);
   return sprite;
 }
 
@@ -152,7 +161,7 @@ function createNodeObject(node: GraphNode) {
 
   const title = node.name.length > 34 ? `${node.name.slice(0, 33)}...` : node.name;
   const label = createLabelSprite(title, node.color, node.size, node.showLabel);
-  label.visible = node.showLabel;
+  label.visible = true;
   group.add(label);
 
   return group;
@@ -192,14 +201,14 @@ function createStarField() {
   const field = new THREE.Group();
   field.name = 'three-dimensional-star-field';
   field.add(
-    createStarLayer(750, 170, 340, 1.75, 0.95, 773),
-    createStarLayer(1100, 360, 720, 1.1, 0.72, 1937),
-    createStarLayer(1500, 730, 1120, 0.75, 0.5, 6203),
+    createStarLayer(750, 170, 340, 1.45, 0.7, 773),
+    createStarLayer(1100, 360, 720, 0.9, 0.38, 1937),
+    createStarLayer(1500, 730, 1120, 0.55, 0.18, 6203),
   );
   return field;
 }
 
-function createGalaxyParticleCloud(source: CanvasImageSource, seed: number) {
+function createGalaxyParticleCloud(source: CanvasImageSource, seed: number, opacity: number) {
   const canvas = document.createElement('canvas');
   canvas.width = 256;
   canvas.height = 256;
@@ -250,7 +259,7 @@ function createGalaxyParticleCloud(source: CanvasImageSource, seed: number) {
     size: 2.1,
     vertexColors: true,
     transparent: true,
-    opacity: 0.86,
+    opacity,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
     sizeAttenuation: true,
@@ -262,13 +271,13 @@ function createGalaxyParticleField(source: CanvasImageSource) {
   const field = new THREE.Group();
   field.name = 'hubble-galaxy-particles';
   const clouds = [
-    { position: new THREE.Vector3(-80, 65, -720), rotation: new THREE.Euler(-0.1, 0.18, -0.08), scale: 1, seed: 481 },
-    { position: new THREE.Vector3(280, -115, -540), rotation: new THREE.Euler(0.15, -0.3, 0.12), scale: 0.62, seed: 1979 },
-    { position: new THREE.Vector3(-390, -170, -600), rotation: new THREE.Euler(-0.18, 0.45, 0.2), scale: 0.48, seed: 7109 },
+    { position: new THREE.Vector3(-80, 65, -720), rotation: new THREE.Euler(-0.1, 0.18, -0.08), scale: 1, opacity: 0.48, seed: 481 },
+    { position: new THREE.Vector3(280, -115, -540), rotation: new THREE.Euler(0.15, -0.3, 0.12), scale: 0.62, opacity: 0.3, seed: 1979 },
+    { position: new THREE.Vector3(-390, -170, -600), rotation: new THREE.Euler(-0.18, 0.45, 0.2), scale: 0.48, opacity: 0.18, seed: 7109 },
   ];
 
   for (const cloud of clouds) {
-    const particles = createGalaxyParticleCloud(source, cloud.seed);
+    const particles = createGalaxyParticleCloud(source, cloud.seed, cloud.opacity);
     particles.position.copy(cloud.position);
     particles.rotation.copy(cloud.rotation);
     particles.scale.setScalar(cloud.scale);
@@ -419,6 +428,15 @@ export default function ThreeDVisualization() {
 
   const graphReady = Boolean(graphData && dimensions.width > 0 && dimensions.height > 0);
 
+  const updateSelectedLabel = (selectedId?: string) => {
+    for (const [nodeId, nodeObject] of nodeObjectsRef.current) {
+      const label = nodeObject.getObjectByName('citation-label');
+      if (label instanceof THREE.Sprite && !Array.isArray(label.material)) {
+        label.material.opacity = nodeId === selectedId ? 1 : label.userData.baseOpacity;
+      }
+    }
+  };
+
   const focusNetwork = () => {
     graphRef.current?.zoomToFit(600, 80);
   };
@@ -439,40 +457,6 @@ export default function ThreeDVisualization() {
       controls.dampingFactor = 0.09;
     }
   }, [autoRotate, graphReady]);
-
-  useEffect(() => {
-    if (!graphReady || !graphData) return;
-
-    let frameId = 0;
-    let lastUpdate = 0;
-    const cameraPosition = new THREE.Vector3();
-    const nodePosition = new THREE.Vector3();
-    const closeViewDistance = 430;
-    const labelRevealDistance = 220;
-
-    const updateLabels = (timestamp: number) => {
-      if (timestamp - lastUpdate >= 90) {
-        const camera = graphRef.current?.camera?.();
-        if (camera) {
-          cameraPosition.copy(camera.position);
-          const showAllLabels = cameraPosition.length() <= closeViewDistance;
-          for (const node of graphData.nodes) {
-            const nodeObject = nodeObjectsRef.current.get(node.id);
-            const label = nodeObject?.getObjectByName('citation-label');
-            if (!label) continue;
-
-            nodeObject.getWorldPosition(nodePosition);
-            label.visible = showAllLabels || node.showLabel || nodePosition.distanceTo(cameraPosition) <= labelRevealDistance;
-          }
-        }
-        lastUpdate = timestamp;
-      }
-      frameId = window.requestAnimationFrame(updateLabels);
-    };
-
-    frameId = window.requestAnimationFrame(updateLabels);
-    return () => window.cancelAnimationFrame(frameId);
-  }, [graphData, graphReady]);
 
   useEffect(() => {
     if (!graphReady) return;
@@ -577,7 +561,7 @@ export default function ThreeDVisualization() {
             <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[#19d3ff]" />1985-1994</span>
             <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[#46f2b0]" />1995-2004</span>
             <span className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-[#ff4fa3]" />2005 ve sonrası</span>
-            <span className="hidden lg:inline text-white/55">Renk: yayın yılı · Boyut: atıf sayısı · Yakınlaşınca tüm makale etiketleri açılır</span>
+            <span className="hidden lg:inline text-white/55">Renk: yayın yılı · Boyut: atıf sayısı · Küçük makalelerin etiketleri saydam</span>
           </div>
           <div className="flex items-center gap-3">
             {graphData && <span className="font-mono text-xs text-white/65">Üst {graphData.sourceNodeCount.toLocaleString('tr-TR')} içinden {graphData.nodes.length} bağlı makale · {graphData.links.length.toLocaleString('tr-TR')} gerçek atıf bağı</span>}
@@ -626,9 +610,13 @@ export default function ThreeDVisualization() {
               linkDirectionalParticleSpeed={0.0025}
               onNodeClick={(node: GraphNode) => {
                 setSelectedNode(node);
+                updateSelectedLabel(node.id);
                 setAutoRotate(false);
               }}
-              onBackgroundClick={() => setSelectedNode(null)}
+              onBackgroundClick={() => {
+                setSelectedNode(null);
+                updateSelectedLabel();
+              }}
               onEngineStop={focusNetwork}
               d3AlphaDecay={0.028}
               d3VelocityDecay={0.3}
@@ -643,8 +631,21 @@ export default function ThreeDVisualization() {
                 <span className="text-[10px] font-bold uppercase tracking-widest text-[#f6bd60]">Seçili makale</span>
                 <p className="mt-1 font-serif text-base font-bold leading-snug">{selectedNode.name}</p>
                 <p className="mt-2 text-xs text-white/65">{selectedNode.year || 'Yıl bilinmiyor'} · {selectedNode.citations || 0} atıf · Görünür ağda {selectedNode.degree} bağlantı</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <a href={`https://scholar.google.com/scholar?q=${encodeURIComponent(selectedNode.name)}`} target="_blank" rel="noreferrer" className="pointer-events-auto inline-flex items-center gap-1.5 border border-white/20 bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white/20">
+                    <FileSearch className="h-3.5 w-3.5" />
+                    Google Scholar'da ara
+                  </a>
+                  <a href={`https://search.crossref.org/?q=${encodeURIComponent(selectedNode.name)}`} target="_blank" rel="noreferrer" className="pointer-events-auto inline-flex items-center gap-1.5 border border-white/20 bg-white/10 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white/20">
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Crossref'te ara
+                  </a>
+                </div>
               </div>
-              <button onClick={() => setSelectedNode(null)} className="pointer-events-auto p-1 text-white/60 transition-colors hover:text-white" title="Seçimi temizle" aria-label="Seçimi temizle">
+              <button onClick={() => {
+                setSelectedNode(null);
+                updateSelectedLabel();
+              }} className="pointer-events-auto p-1 text-white/60 transition-colors hover:text-white" title="Seçimi temizle" aria-label="Seçimi temizle">
                 <X className="h-4 w-4" />
               </button>
             </div>

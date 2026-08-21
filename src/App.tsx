@@ -6,7 +6,7 @@ import TextAnalysis from './components/TextAnalysis';
 import PhilosophyNetwork from './components/PhilosophyNetwork';
 import LiteratureArchive from './components/LiteratureArchive';
 import ThreeDVisualization from './components/ThreeDVisualization';
-import { siteContent } from './siteContent';
+import siteContent from './METINLERI_DUZENLE.json';
 
 type Section = 'hakkinda' | 'literatur_arsivi' | 'metin_analizi' | 'network_analizi' | 'mekansal_analiz' | 'gorsellestirme_3d';
 
@@ -49,13 +49,13 @@ export default function App() {
           </div>
 
           <div className="flex w-full overflow-x-auto gap-2 bg-white/50 p-1 rounded-lg border border-gray-200/60 shadow-sm custom-scrollbar pb-1">
-             <NavButton section="hakkinda" icon={Info} label="Proje Hakkında" />
-             <NavButton section="literatur_arsivi" icon={Search} label="Literatür Arşivi" />
+             <NavButton section="hakkinda" icon={Info} label={siteContent.navigation.about} />
+             <NavButton section="literatur_arsivi" icon={Search} label={siteContent.navigation.literature} />
              <div className="w-px h-6 bg-gray-200 my-auto mx-1 shrink-0"></div>
-             <NavButton section="metin_analizi" icon={BarChart2} label="Metin Analizi" />
-             <NavButton section="mekansal_analiz" icon={Globe2} label="Mekânsal Analiz" />
-             <NavButton section="network_analizi" icon={Network} label="Ağ Analizi" />
-             <NavButton section="gorsellestirme_3d" icon={Box} label="3B Görselleştirme" />
+             <NavButton section="metin_analizi" icon={BarChart2} label={siteContent.navigation.textAnalysis} />
+             <NavButton section="mekansal_analiz" icon={Globe2} label={siteContent.navigation.spatialAnalysis} />
+             <NavButton section="network_analizi" icon={Network} label={siteContent.navigation.networkAnalysis} />
+             <NavButton section="gorsellestirme_3d" icon={Box} label={siteContent.navigation.visualization3d} />
           </div>
         </div>
       </nav>
@@ -78,15 +78,15 @@ export default function App() {
                  
                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-4">
                    <div className="flex flex-col gap-2">
-                     <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-wider border-b border-gray-200 pb-2">Proje Yürütücüsü</span>
+                     <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-wider border-b border-gray-200 pb-2">{siteContent.labels.projectManager}</span>
                      <span className="text-base font-serif font-semibold text-gray-900">{siteContent.team[0].name}</span>
                    </div>
                    <div className="flex flex-col gap-2">
-                     <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-wider border-b border-gray-200 pb-2">Kurum</span>
+                     <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-wider border-b border-gray-200 pb-2">{siteContent.labels.institution}</span>
                      <span className="text-base font-serif font-semibold text-gray-900">{siteContent.university}</span>
                    </div>
                    <div className="flex flex-col gap-2">
-                     <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-wider border-b border-gray-200 pb-2">Ana Odak</span>
+                     <span className="text-xs font-sans font-bold text-gray-400 uppercase tracking-wider border-b border-gray-200 pb-2">{siteContent.labels.focus}</span>
                      <span className="text-base font-serif font-normal italic text-gray-700">{siteContent.project.focus}</span>
                    </div>
                  </div>
@@ -142,28 +142,9 @@ export default function App() {
                  </div>
                </section>
 
-               {/* Ekip ve İletişim */}
-               <section className="flex flex-col gap-6 mt-4">
-                 <div className="px-2">
-                   <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                     <div className="w-2 h-6 bg-[#8A1538] rounded-full"></div>
-                     {siteContent.scalabilityHeading}
-                   </h3>
-                   <p className="text-[15px] pt-1 text-gray-600">{siteContent.scalabilityIntro}</p>
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {siteContent.scalability.map(item => (
-                       <div key={item.title} className="bg-white p-6 rounded-[20px] shadow-sm border border-gray-200">
-                        <h4 className="font-bold text-gray-900 mb-2 text-lg">{item.title}</h4>
-                        <p className="text-sm text-gray-600 leading-relaxed">{item.description}</p>
-                       </div>
-                      ))}
-                 </div>
-               </section>
-
                <section className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8">
                  <div className="flex flex-col gap-6">
-                   <h3 className="font-serif text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4">Akademik Kadro</h3>
+                   <h3 className="font-serif text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4">{siteContent.labels.academicStaff}</h3>
                    <div className="flex flex-col gap-6">
                      {siteContent.team.map(member => (
                        <div key={member.name} className="flex items-start gap-5">
@@ -181,7 +162,7 @@ export default function App() {
                  </div>
 
                  <div className="flex flex-col gap-6">
-                   <h3 className="font-serif text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4">İletişim</h3>
+                   <h3 className="font-serif text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4">{siteContent.labels.contact}</h3>
                    <div className="flex flex-col gap-6">
                      <div className="font-sans">
                        <p className="text-[15px] text-gray-800 leading-relaxed">
@@ -235,7 +216,7 @@ export default function App() {
                  <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
                  <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-green-500 animate-ping opacity-75"></div>
                </div>
-               <span className="text-[11px] font-bold text-gray-600 uppercase tracking-widest">Veritabanı Senkronize</span>
+               <span className="text-[11px] font-bold text-gray-600 uppercase tracking-widest">{siteContent.labels.databaseSynchronized}</span>
              </div>
              <span className="text-[11px] font-mono text-gray-400">DBF-2025 v1.6.0</span>
            </div>
