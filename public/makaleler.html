@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tüm Makaleler | Dijital Bilim Felsefesi</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        primary: '#8A1538'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            background-color: #FAFAFA; 
+            -webkit-font-smoothing: antialiased; 
+        }
+        .abstract-content {
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, margin-top 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            margin-top: 0;
+        }
+        .abstract-content.expanded {
+            max-height: 2000px; /* arbitrary large value */
+            opacity: 1;
+            margin-top: 1.5rem;
+        }
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+        .chevron.rotated {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-900 selection:bg-primary selection:text-white flex flex-col min-h-screen">
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="fixed inset-0 bg-[#FAFAFA] z-50 flex items-center justify-center">
+        <div class="flex flex-col items-center gap-6">
+            <div class="h-10 w-10 animate-spin rounded-full border-2 border-gray-200 border-t-primary"></div>
+            <p class="font-serif italic text-lg text-gray-500">Veriler Derleniyor...</p>
+        </div>
+    </div>
+
+    <!-- Main Content (Hidden initially) -->
+    <div id="app" style="display:none;" class="flex-1 w-full flex flex-col items-center">
+        <div class="max-w-[1270px] w-full px-6 py-12 md:py-16 flex flex-col gap-10">
+            
+            <div class="border-b border-gray-200 pb-8 flex flex-col gap-3">
+                <h1 class="font-serif text-4xl font-bold text-gray-900">
+                    Dergi Özetleri ve Makaleler
+                </h1>
+                <p class="font-sans text-base text-gray-600 max-w-2xl">
+                    Kastamonu Üniversitesi TÜBİTAK 1001 Projesi kapsamında derlenen yayınların arşivi. Arama yaparak veya filtreleri kullanarak ilgili makalelere ve özetlerine ulaşabilirsiniz.
+                </p>
+            </div>
+
+            <!-- Enhanced Search & Filter UI -->
+            <section class="bg-white p-6 border border-gray-200 shadow-sm flex flex-col lg:flex-row gap-6">
+                <!-- Text Search -->
+                <div class="relative flex-1">
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="Yazar, başlık veya özet içerisinde ara..." 
+                        class="w-full bg-white border-b-2 border-gray-200 px-0 py-3 text-base outline-none focus:border-primary transition-colors text-gray-900 placeholder:text-gray-400 font-sans"
+                    />
+                    <i data-lucide="search" class="absolute right-0 top-4 w-5 h-5 text-gray-400"></i>
+                </div>
+                
+                <!-- Drodown Filters -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full lg:w-auto font-sans">
+                    <select id="yearFilter" class="bg-gray-50 border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary text-gray-900 cursor-pointer min-w-[120px]">
+                        <option value="">Tüm Yıllar</option>
+                    </select>
+
+                    <select id="themeFilter" class="bg-gray-50 border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary text-gray-900 cursor-pointer min-w-[160px]">
+                        <option value="">Tüm Temalar</option>
+                    </select>
+
+                    <select id="journalFilter" class="bg-gray-50 border border-gray-200 px-4 py-3 text-sm outline-none focus:border-primary text-gray-900 cursor-pointer min-w-[160px]">
+                        <option value="">Tüm Dergiler</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Results Count & Reset -->
+            <div class="flex items-center justify-between font-sans text-sm">
+                <span class="text-gray-500 italic">
+                    Toplam <strong id="resultCount" class="text-gray-900">0</strong> sonuç gösteriliyor.
+                </span>
+                <button id="resetFiltersBtn" style="display:none;" class="text-primary hover:text-black underline underline-offset-4 font-semibold">
+                    Filtreleri Sıfırla
+                </button>
+            </div>
+
+            <!-- Articles List -->
+            <div id="articlesContainer" class="flex flex-col gap-0 border-t border-gray-200">
+                <!-- Cards will be injected here via JS -->
+            </div>
+            
+            <div id="noResults" style="display:none;" class="flex-col items-center justify-center py-20 text-center">
+                <div class="w-16 h-1 bg-gray-200 mb-6 mx-auto"></div>
+                <h3 class="font-serif text-2xl text-gray-900 mb-2">Makale Bulunamadı</h3>
+                <p class="font-sans text-gray-500">Arama kriterlerinize uygun sonuç arşivde yer almamaktadır.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vanilla JS Application Logic -->
+    <script>
+        const API_URL = 'https://raw.githubusercontent.com/nukIeer/makaleler/refs/heads/main/1.json';
+        
+        // State
+        let allArticles = [];
+        let filteredArticles = [];
+        let expandedAbstracts = {};
+        
+        // Filter elements
+        const searchInput = document.getElementById('searchInput');
+        const yearFilter = document.getElementById('yearFilter');
+        const themeFilter = document.getElementById('themeFilter');
+        const journalFilter = document.getElementById('journalFilter');
+        const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+        const articlesContainer = document.getElementById('articlesContainer');
+        const resultCount = document.getElementById('resultCount');
+        const noResults = document.getElementById('noResults');
+
+        // Initialization
+        async function init() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Data fetch failed');
+                
+                const data = await response.json();
+                
+                // Parse correctly based on structure
+                let rawArticles = [];
+                if (Array.isArray(data)) {
+                    rawArticles = data;
+                } else if (data.makaleler && Array.isArray(data.makaleler)) {
+                    rawArticles = data.makaleler;
+                } else if (data.articles && Array.isArray(data.articles)) {
+                    rawArticles = data.articles;
+                }
+
+                // Map data uniformly
+                allArticles = rawArticles.map((item, idx) => ({
+                    id: idx.toString(),
+                    baslik: item.baslik || item.title || 'İsimsiz Makale',
+                    yazar: item.yazar || (item.authors ? item.authors.join(', ') : 'Bilinmeyen Yazar'),
+                    dergi_kodu: item.dergi_kodu || item.doi || '',
+                    dergi_adi: item.dergi_adi || item.dergi_kodu || '',
+                    yil: item.yil ? Number(item.yil) : (item.year ? Number(item.year) : 0),
+                    ozet_tr: item.ozet_tr || item.abstract_tr || '',
+                    ozet_en: item.ozet_en || '',
+                    temalar: item.temalar || [],
+                    etiketler: item.etiketler || []
+                }));
+
+                populateDropdowns();
+                applyFilters();
+
+                // Setup Listeners
+                searchInput.addEventListener('input', applyFilters);
+                yearFilter.addEventListener('change', applyFilters);
+                themeFilter.addEventListener('change', applyFilters);
+                journalFilter.addEventListener('change', applyFilters);
+                resetFiltersBtn.addEventListener('click', resetFilters);
+
+                // Show Content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('app').style.display = 'flex';
+                
+                lucide.createIcons();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').innerHTML = '<p class="font-serif italic text-lg text-primary">Veriler yüklenirken bağlantı hatası oluştu.</p>';
+            }
+        }
+
+        function populateDropdowns() {
+            const years = new Set();
+            const themes = new Set();
+            const journals = new Set();
+
+            allArticles.forEach(a => {
+                if (a.yil && !isNaN(a.yil)) years.add(a.yil);
+                if (a.temalar && Array.isArray(a.temalar)) {
+                    a.temalar.forEach(t => themes.add(t));
+                }
+                if (a.dergi_adi) journals.add(a.dergi_adi);
+            });
+
+            // Years
+            Array.from(years).sort((a, b) => b - a).forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = opt.textContent = year;
+                yearFilter.appendChild(opt);
+            });
+
+            // Themes
+            Array.from(themes).sort().forEach(theme => {
+                const opt = document.createElement('option');
+                opt.value = opt.textContent = theme;
+                themeFilter.appendChild(opt);
+            });
+
+            // Journals
+            Array.from(journals).sort().forEach(journal => {
+                const opt = document.createElement('option');
+                opt.value = opt.textContent = journal;
+                journalFilter.appendChild(opt);
+            });
+        }
+
+        function applyFilters() {
+            const query = searchInput.value.toLowerCase();
+            const year = yearFilter.value;
+            const theme = themeFilter.value;
+            const journal = journalFilter.value;
+
+            const hasActiveFilters = query || year || theme || journal;
+            resetFiltersBtn.style.display = hasActiveFilters ? 'inline-block' : 'none';
+
+            filteredArticles = allArticles.filter(a => {
+                const matchesSearch = !query || 
+                    a.baslik.toLowerCase().includes(query) ||
+                    a.yazar.toLowerCase().includes(query) ||
+                    (a.ozet_tr && a.ozet_tr.toLowerCase().includes(query)) ||
+                    (a.ozet_en && a.ozet_en.toLowerCase().includes(query));
+
+                const matchesYear = !year || String(a.yil) === year;
+                const matchesTheme = !theme || (a.temalar && a.temalar.includes(theme));
+                const matchesJournal = !journal || a.dergi_adi === journal;
+
+                return matchesSearch && matchesYear && matchesTheme && matchesJournal;
+            });
+
+            renderArticles();
+        }
+
+        function resetFilters() {
+            searchInput.value = '';
+            yearFilter.value = '';
+            themeFilter.value = '';
+            journalFilter.value = '';
+            applyFilters();
+        }
+
+        function toggleAbstract(id) {
+            expandedAbstracts[id] = !expandedAbstracts[id];
+            
+            const contentDiv = document.getElementById(`abstract-content-${id}`);
+            const chevron = document.getElementById(`chevron-${id}`);
+            const btnText = document.getElementById(`btn-text-${id}`);
+            
+            if (expandedAbstracts[id]) {
+                contentDiv.classList.add('expanded');
+                chevron.classList.add('rotated');
+                btnText.textContent = 'Özeti Gizle';
+            } else {
+                contentDiv.classList.remove('expanded');
+                chevron.classList.remove('rotated');
+                btnText.textContent = 'Özeti Göster';
+            }
+        }
+
+        function renderArticles() {
+            resultCount.textContent = filteredArticles.length;
+            articlesContainer.innerHTML = '';
+
+            if (filteredArticles.length === 0) {
+                noResults.style.display = 'flex';
+            } else {
+                noResults.style.display = 'none';
+
+                filteredArticles.forEach(article => {
+                    // Temalar HTML
+                    const temalarHtml = (article.temalar || []).map(t => 
+                        `<span class="px-3 py-1 text-xs text-primary bg-primary/5 border border-primary/20">${t}</span>`
+                    ).join('');
+
+                    // Etiketler HTML
+                    const etiketlerHtml = (article.etiketler || []).map(e => 
+                        `<span class="px-3 py-1 text-xs text-gray-600 border border-gray-200">${e}</span>`
+                    ).join('');
+
+                    // Özet Butonu ve İçeriği
+                    let abstractHtml = '';
+                    if (article.ozet_tr || article.ozet_en) {
+                        const isExpanded = !!expandedAbstracts[article.id];
+                        
+                        let trHtml = '';
+                        if (article.ozet_tr) {
+                            trHtml = `
+                                <div class="text-[16px] leading-relaxed text-gray-800">
+                                    <span class="block font-sans font-bold text-xs text-gray-400 mb-2 uppercase tracking-widest">ÖZET (TR)</span>
+                                    ${article.ozet_tr}
+                                </div>
+                            `;
+                        }
+
+                        let enHtml = '';
+                        if (article.ozet_en) {
+                            enHtml = `
+                                <div class="text-[16px] leading-relaxed text-gray-800 border-t border-gray-100 pt-6">
+                                    <span class="block font-sans font-bold text-xs text-gray-400 mb-2 uppercase tracking-widest">ABSTRACT (EN)</span>
+                                    ${article.ozet_en}
+                                </div>
+                            `;
+                        }
+
+                        abstractHtml = `
+                            <div class="mt-2">
+                                <button onclick="toggleAbstract('${article.id}')" class="font-sans font-semibold text-sm text-gray-900 flex items-center gap-2 hover:text-primary transition-colors group">
+                                    <span id="btn-text-${article.id}" class="border-b border-black group-hover:border-primary pb-0.5">Özeti Göster</span>
+                                    <i data-lucide="chevron-down" id="chevron-${article.id}" class="w-4 h-4 chevron"></i>
+                                </button>
+                                
+                                <div id="abstract-content-${article.id}" class="abstract-content pl-0 sm:pl-4 border-l-2 border-gray-200">
+                                    <div class="flex flex-col gap-6 font-serif">
+                                        ${trHtml}
+                                        ${enHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = "flex flex-col py-8 border-b border-gray-200 group";
+                    card.innerHTML = `
+                        <div class="flex flex-wrap items-center gap-3 mb-3 font-sans text-xs">
+                            <span class="font-bold text-gray-900 bg-gray-100 px-2 py-1">
+                                ${article.yil || 'Tarihsiz'}
+                            </span>
+                            ${article.dergi_adi ? `<span class="text-gray-500 uppercase tracking-widest border-l border-gray-300 pl-3">${article.dergi_adi}</span>` : ''}
+                        </div>
+                        <h3 class="font-serif text-2xl font-bold text-gray-900 leading-snug mb-2 group-hover:text-primary transition-colors">
+                            ${article.baslik}
+                        </h3>
+                        <p class="font-sans text-[15px] text-gray-600 mb-6">
+                            ${article.yazar}
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-6 font-sans">
+                            ${temalarHtml}
+                            ${etiketlerHtml}
+                        </div>
+                        ${abstractHtml}
+                    `;
+                    articlesContainer.appendChild(card);
+                });
+
+                // Re-initialize icons for newly added elements
+                lucide.createIcons();
+            }
+        }
+
+        // Start
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
