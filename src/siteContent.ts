@@ -1,0 +1,61 @@
+// Bu dosyadaki metinler ana sayfada görünür. Tırnak içindeki metinleri
+// düzenleyebilir; yeni satırlarda her satırın sonunda virgül bırakabilirsiniz.
+export const siteContent = {
+  university: 'Kastamonu Üniversitesi',
+  project: {
+    program: 'TÜBİTAK 2218',
+    number: '123C302',
+    title: 'Investigation of Metaphysical Concepts of Philosophy of Science with Digitalisation in Humanities',
+    focus: 'Doğa Yasaları ve Nedensellik Kavramları',
+  },
+  department: 'Kastamonu Üniversitesi İnsan ve Toplum Bilimleri Fakültesi Bilim Tarihi Bölümü',
+  contact: {
+    location: 'Kastamonu, Türkiye',
+    email: 'oftekin@kastamonu.edu.tr',
+    note: 'İş birliği veya sorularınız için iletişime geçebilirsiniz.',
+  },
+  team: [
+    {
+      role: 'Proje Yürütücüsü',
+      name: 'Doç. Dr. Ömer Fatih TEKİN',
+      specialty: 'Uzmanlık: Bilim Felsefesi, Dijital Beşeri Bilimler',
+    },
+    {
+      role: 'Danışman',
+      name: 'Prof. Dr. Mehmet Hilmi DEMİR',
+    },
+  ],
+  tags: ['Metafizik', 'Kavramlar', 'Ağ Analizi', 'Veri Görselleştirme', 'Dijital Haritalama'],
+  about: {
+    heading: 'Dijital Beşeri Bilimlerle Bilim Felsefesi',
+    paragraphs: [
+      'Bu araştırma projesi, bilim felsefesinin temel metafizik kavramlarını dijitalleştirme yoluyla analiz etmeyi, görselleştirmeyi ve haritalamayı hedeflemektedir. Özellikle doğa yasaları ve nedensellik kavramları üzerinden dijital bilim felsefesinin yeni bir metodolojisini geliştirmeyi amaçlıyoruz.',
+      'Proje, klasik felsefe çalışmalarını dijital beşeri bilimler araçlarıyla birleştirerek, bilim felsefesi literatüründeki kavramsal ilişkileri ağ analizi, metin madenciliği ve veri görselleştirme teknikleriyle ortaya çıkarmaktadır.',
+      'Dijital yöntemler kullanarak, felsefi metinlerdeki kavramsal yapıları, ekoller arası ilişkileri ve tarihsel gelişimleri görsel ve analitik bir biçimde sunuyoruz. Bu yaklaşım, bilim felsefesi araştırmalarına yeni bir perspektif kazandırmayı hedeflemektedir.',
+      'Dijital bilim felsefesi yaklaşımımız, geleneksel felsefi analiz yöntemlerini modern veri bilimi teknikleriyle harmanlayarak, bilim felsefesi literatüründe yeni içgörüler elde etmeyi sağlar. Bu çalışma, Türkiye\'de dijital beşeri bilimler alanında öncü projelerden biri olması ve bilim felsefesi araştırmalarına metodolojik yenilik getirmesi açısından önem taşımaktadır.',
+    ],
+  },
+  highlights: [
+    { title: 'Yenilikçi Yaklaşım', description: 'Dijital beşeri bilimler ile bilim felsefesini buluşturan disiplinler arası metodoloji.' },
+    { title: 'Kapsamlı Veri', description: 'Geniş literatür taraması ve dijital arşivleme ile oluşturulan zengin veri seti.' },
+    { title: 'Görsel Analiz', description: 'Ağ görselleştirmeleri ve interaktif haritalarla kavramsal ilişkilerin keşfi.' },
+    { title: 'Açık Bilim', description: 'Araştırma verilerinin ve araçlarının akademik toplulukla paylaşılması.' },
+  ],
+  researchAreasHeading: 'Araştırma Alanları',
+  researchAreasIntro: 'Projemizin odaklandığı temel kavramsal alanlar ve araştırma konuları.',
+  researchAreas: [
+    { title: 'Doğa Yasaları', description: 'Doğa yasalarının metafizik doğası, farklı felsefi yaklaşımlar (Humean, non-Humean teoriler), bilimsel yasaların statüsü ve evrensellik tartışmaları. Dijital analiz yöntemleriyle literatürdeki yaklaşımların haritalanması.' },
+    { title: 'Nedensellik', description: 'Nedensellik kavramının felsefi analizi, sebep-sonuç ilişkilerinin doğası, determinizm ve indeterminizm tartışmaları, kuantum mekaniğinde nedensellik. Kavramsal ağların dijital görselleştirmesi.' },
+    { title: 'Kavramsal Ağ Analizi', description: 'Bilim felsefesi literatüründeki kavramsal ilişkilerin ağ analizi yöntemleriyle incelenmesi. Yazarlar, kavramlar ve ekoller arası bağlantıların dijital haritalanması ve görselleştirilmesi.' },
+    { title: 'Metin Madenciliği', description: 'Felsefi metinlerin dijital analizi, doğal dil işleme teknikleriyle kavram çıkarımı, literatürdeki eğilimlerin ve değişimlerin tespit edilmesi. Büyük ölçekli metin korpuslarının işlenmesi.' },
+  ],
+  scalabilityHeading: 'Büyük Veri ve Ölçeklenebilirlik Analizi',
+  scalabilityIntro: 'Sisteme büyük boyutlu veri seti (örneğin 10.000+ makale) girildiğinde oluşabilecek limitasyonlar ve çözüm önerileri.',
+  scalability: [
+    { title: '1. Tarayıcı Belleği ve Ağ Sınırları', description: 'Mevcut yapı tüm veriyi GitHub üzerinden tek bir JSON nesnesi olarak çekmektedir. Veri çok büyüdüğünde sayfanın ilk açılış süresi yavaşlayacak ve tarayıcı belleğini şişirecektir. Çözüm: Verilerin sunucudan sayfalara bölünerek çekilmesi ve Node.js/Python tabanlı bir backend veritabanı kurulması.' },
+    { title: '2. Ağ Görselleştirmesi (Network ve 3B)', description: 'Binlerce düğüm ve bağ içeren bir ağ grafiği, tarayıcının fizik motorunu aşırı yorarak cihazı dondurabilir. Çözüm: Görselleştirmelerde kümeleme yapılması veya yalnızca en çok atıf alan ya da en ilişkili 500 düğümün filtrelenerek çizdirilmesi.' },
+    { title: '3. Metin İşleme ve İstemci Yükü', description: 'On binlerce makale özeti üzerinde tarayıcı tabanlı anlık metin analizi yapmak mümkün değildir. Çözüm: Ağır doğal dil işleme analizlerinin sunucu tarafında önceden hesaplatılıp arayüze yalnızca sonuçların gönderilmesi.' },
+    { title: '4. DOM Şişmesi (Arayüz Kilitlenmesi)', description: 'HTML içine binlerce makale kartının aynı anda basılması DOM\'da on binlerce element yaratıp sayfayı kilitler. Çözüm: Yalnızca kullanıcının ekranında görünen kısımları render eden sanal liste kütüphanelerinin entegre edilmesi.' },
+  ],
+  footer: 'Tüm hakları saklıdır. Bu arayüz TÜBİTAK 2218 kapsamında geliştirilmiştir.',
+} as const;
