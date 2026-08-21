@@ -301,7 +301,7 @@ export default function LiteratureArchive() {
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="inline-flex items-center gap-2 font-mono text-[11px] md:text-xs tracking-[0.2em] font-bold text-[#8A1538] uppercase mb-5 bg-rose-50 px-3 md:px-4 py-1.5 md:py-2 rounded border border-rose-100">
             <span className="w-2 h-2 rounded-full bg-[#8A1538] animate-pulse"></span>
-            TÜBİTAK 1001 Veritabanı
+            TÜBİTAK 2218 Veritabanı
           </div>
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-5 tracking-tight">
             Literatür Arşivi
