@@ -41,7 +41,7 @@ export default function App() {
         <div className="max-w-[1270px] w-full px-6 flex flex-col items-center justify-between gap-4">
           <div className="flex flex-col items-center w-full border-b border-gray-200 pb-3 sm:border-0 sm:pb-0 sm:items-start">
             <span className="font-serif font-bold text-xl tracking-tight text-gray-900">
-              {siteContent.university}
+              Dijital Bilim Felsefesi
             </span>
             <span className="font-sans text-[10px] tracking-widest text-[#8A1538] uppercase font-semibold mt-1">
               {siteContent.project.program} Projesi ({siteContent.project.number})
@@ -146,13 +146,17 @@ export default function App() {
                  <div className="flex flex-col gap-6">
                    <h3 className="font-serif text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4">{siteContent.labels.academicStaff}</h3>
                    <div className="flex flex-col gap-6">
-                     {siteContent.team.map(member => (
+                     {siteContent.team.map((member, index) => (
                        <div key={member.name} className="flex items-start gap-5">
                          <div className="flex flex-col gap-1">
                            <h4 className="font-serif font-bold text-lg text-gray-900">{member.name}</h4>
                            <span className="font-sans text-[11px] font-bold text-[#8A1538] uppercase tracking-widest">{member.role}</span>
                            <div className="font-sans text-[14px] text-gray-600 mt-2 leading-relaxed">
-                             <p>{siteContent.department}</p>
+                             <p>
+                               {index === 1 
+                                 ? "Ankara Sosyal Bilimler Üniversitesi Sosyal ve Beşeri Bilimler Fakültesi Felsefe Bölümü" 
+                                 : siteContent.department}
+                             </p>
                              {'specialty' in member && <p className="mt-3 text-gray-800 text-sm font-medium">{member.specialty}</p>}
                            </div>
                          </div>
